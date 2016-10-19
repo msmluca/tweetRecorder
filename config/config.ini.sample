@@ -1,0 +1,14 @@
+[DEFAULT]
+active = 1
+tweeter_data_folder = 
+pid_folder = 
+consumer_key = 
+consumer_secret = 
+access_token = 
+access_token_secret = 
+output_file_prefix = default_
+
+[STREAM_BREXIT]
+active = 0
+output_file_prefix = brexit_
+hashtags = ["brexit","#brexit"]
