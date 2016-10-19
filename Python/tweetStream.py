@@ -2,15 +2,32 @@
 # @Author: Luca Minello - luca.minello@gmail.com
 # @Date:   2016-10-10 15:03:16
 # @Last Modified by:   Luca Minello
-# @Last Modified time: 2016-10-18 20:39:39
+# @Last Modified time: 2016-10-19 22:57:47
 
 
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 import glob, csv, json, configparser, os, sys, getopt, signal
+import logging
 import gzip
 from datetime import datetime
+
+
+class StreamToLogger(object):
+   """
+   Fake file-like stream object that redirects writes to a logger instance.
+   """
+   def __init__(self, logger, log_level=logging.INFO):
+      self.logger = logger
+      self.log_level = log_level
+      self.linebuf = ''
+ 
+   def write(self, buf):
+      for line in buf.rstrip().splitlines():
+         self.logger.log(self.log_level, line.rstrip())
+ 
+
 
 class StdOutListener(StreamListener):
 	""" A listener handles tweets are the received from the stream.
@@ -53,6 +70,22 @@ def stream_channel(configuration, channel_name):
 	hashtags = json.loads(configuration[channel_name]['hashtags'])
 	
 	print(output_file)
+
+	logging.basicConfig(
+		level=logging.INFO,
+		format='%(asctime)s:%(levelname)s:%(name)s:%(message)s',
+		filename= configuration[channel_name]['tweeter_data_folder'] + "/" + configuration[channel_name]['output_file_prefix'] + start_datetime + ".log",
+		filemode='a'
+	)
+
+	stdout_logger = logging.getLogger('STDOUT')
+	sl = StreamToLogger(stdout_logger, logging.INFO)
+	sys.stdout = sl
+
+	stderr_logger = logging.getLogger('STDERR')
+	sl = StreamToLogger(stderr_logger, logging.ERROR)
+	sys.stderr = sl
+
 	
 	l = StdOutListener(output_file)
 	auth = OAuthHandler(consumer_key, consumer_secret)
@@ -92,6 +125,7 @@ def main(argv):
 	if not channel_name in configuration:        
 		print("Channel %s not found" % channel_name)
 		sys.exit()
+	
 
 	print("")
 	print("^^^ TWEETER STREAMING ^^^")

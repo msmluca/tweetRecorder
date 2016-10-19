@@ -31,13 +31,19 @@ then
 	python tweetStop.py
 	sleep 1
 
-	echo "[2/3] Compress data"
+	#python tweetCompress.py
+	echo "[2/4] Update Stats"
+	cd $SCRIPT_FOLDER
+	python tweetStats.py
+	sleep 1
+
+	echo "[3/4] Compress data"
 	cd $DATA_FOLDER
 	gzip *json
 	sleep 1
 
 	#python tweetCompress.py
-	echo "[3/3] Resume streaming"
+	echo "[4/4] Resume streaming"
 	cd $SCRIPT_FOLDER
 	python tweetRun.py
 	sleep 1
