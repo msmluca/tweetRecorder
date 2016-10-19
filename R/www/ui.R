@@ -47,7 +47,7 @@ dashboardPage(skin = "purple",
                           )
                   ),
                   tabItem(tabName = "s_monitoring",
-                          plotOutput("mytext")
+                          plotlyOutput("mytext")
                   )
                 )
               )

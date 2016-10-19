@@ -25,10 +25,10 @@ def main():
 	configuration = load_configuration('../config/config.ini')
 
 	for channel_name in configuration.sections():
+		print(channel_name)
 		tweeter_data_folder = configuration[channel_name]['tweeter_data_folder'] + "/"
 		tweeter_data_json = configuration[channel_name]['output_file_prefix'] + "*.json"
 		tweeter_data_stat = configuration[channel_name]['tweeter_data_folder'] + "/" + configuration[channel_name]['output_file_prefix'] + "stats.csv"
-
 		create_header = False
 
 		if not os.path.isfile(tweeter_data_stat):			

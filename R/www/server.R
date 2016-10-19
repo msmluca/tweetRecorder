@@ -6,6 +6,7 @@
 #
 
 library(shiny)
+library(plotly)
 library(DT)
 library(dplyr)
 library(jsonlite)
@@ -18,8 +19,38 @@ print(getwd())
 configuration <<- Parse.INI(CONFIG_FILE)
 
 shinyServer(function(input, output, session) {
-  test <- reactive({
-    plot(c(1:10))
+  
+  output$mytext <-  renderPlotly({
+    channel = 'CHANNEL_MSM_ADVERT'
+    #filename = "/home/rob/Projects/Work/tweetRecorder/data/msm_advert_stats.csv"
+    filename = paste0(configuration[['DEFAULT']]$tweeter_data_folder,"/","msm_tweet_stats.csv")
+    tweets = read.csv(filename, colClasses = "character")
+    tweets = tweets[!duplicated(tweets$id_str),]
+    
+    tweets$created_at_dt = as.POSIXct(strptime(tweets$created_at, "%a %b %d %H:%M:%S +0000 %Y"))
+    tweets$created_at_d = as.Date(tweets$created_at_dt)
+    tweets$created_at <- NULL
+    
+    hashtags = tolower(configuration[[channel]]$hashtags)
+    
+    if(is.null(tags))
+      hashtags = ""
+    else
+      hashtags = unique(fromJSON(tolower(gsub('#','',hashtags))))
+    
+    tweets.plot = plot_ly( type = 'scatter', mode = 'lines') 
+    
+    for(hashtag in hashtags){
+      tmp.plot = tweets %>% filter(grepl(hashtag, entities.hashtags) ) %>%
+        group_by(created_at_d) %>% mutate(myhashtag = hashtag) %>% summarise(count = n())
+      
+      tweets.plot = tweets.plot %>%
+        add_trace(x=tmp.plot$created_at_d, y =tmp.plot$count, evaluate = TRUE ,  name=paste0(hashtag))
+        #rbind(tweets.plot , tmp.plot)
+    }
+    
+    tweets.plot
+    
   })
   
   output$ui_configurestream <- renderConfiguration(input, configuration)
