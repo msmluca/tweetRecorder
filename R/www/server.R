@@ -24,10 +24,23 @@ shinyServer(function(input, output, session) {
   channels <<- channels[channels != "DEFAULT"]
   
   output$ui_streams <- renderUI({
-    sidebarMenu(
-      menuItem("Configure Stream", tabName = "s_configurestream", icon = icon("line-chart")),
-      menuItem("Monitor Stream", tabName = "s_monitoring", icon = icon("bar-chart")),
-               selectInput("s_select_channel", label = "Select Channel", choices = channels))
+      selectInput("s_select_channel", label = "Select Channel", choices = channels)
+  })
+  
+  output$channel_log <- renderPrint({
+    channel = input$s_select_channel
+    
+    filename_path = configuration[['DEFAULT']]$tweeter_data_folder
+    filename_pattern = paste0(configuration[[channel]]$output_file_prefix,".*log")
+    logfile = sort(list.files(filename_path, pattern = filename_pattern),decreasing = TRUE)[1]
+    
+    if(!is.na(logfile)){
+      text = readLines(paste0(filename_path,"/",logfile), warn = FALSE)
+      split_text = rev(lapply(text, function(x) if (length(x) > 0) {unlist(splitInParts(x,120))}))[1:10]
+      cat(unlist(split_text),sep="\n")
+    }
+    else
+      cat("No log file found!")
   })
   
   output$channel_plot <- renderPlotly({
@@ -55,10 +68,19 @@ shinyServer(function(input, output, session) {
       tmp.plot = tweets %>% filter(grepl(hashtag, entities.hashtags) ) %>%
         group_by(created_at_d) %>% mutate(myhashtag = hashtag) %>% summarise(count = n())
       
-      tweets.plot = tweets.plot %>%
+      tweets.plot <- tweets.plot %>%
         add_trace(x=tmp.plot$created_at_d, y =tmp.plot$count, evaluate = TRUE ,  name=paste0(hashtag))
         #rbind(tweets.plot , tmp.plot)
     }
+    
+    tweets.plot <- tweets.plot %>% layout(                        # all of layout's properties: /r/reference/#layout
+      title = paste0("Tweets ",channel), # layout's title: /r/reference/#layout-title
+      xaxis = list(           # layout's xaxis is a named list. List of valid keys: /r/reference/#layout-xaxis
+        title = "Time",      # xaxis's title: /r/reference/#layout-xaxis-title
+        showgrid = T),       # xaxis's showgrid: /r/reference/#layout-xaxis-showgrid
+      yaxis = list(           # layout's yaxis is a named list. List of valid keys: /r/reference/#layout-yaxis
+        title = "Count")     # yaxis's title: /r/reference/#layout-yaxis-title
+    )
     
     tweets.plot
     
@@ -78,6 +100,9 @@ shinyServer(function(input, output, session) {
       channels <<- names(configuration)
       channels <<- channels[channels != "DEFAULT"]
       output$ui_configurestream <- renderConfiguration(input, configuration)
+      output$ui_streams <- renderUI({
+        selectInput("s_select_channel", label = "Select Channel", choices = channels)
+      })
     }
   })
   
@@ -188,4 +213,10 @@ renderConfiguration <- function(input, configuration){
     
     ret_output
   })
+}
+
+
+splitInParts <- function(string, size){
+  pat <- paste0('(?<=.{',size,'})')
+  strsplit(string, pat, perl=TRUE)
 }

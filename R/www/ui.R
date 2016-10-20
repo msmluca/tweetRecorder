@@ -21,11 +21,11 @@ dashboardPage(skin = "purple",
               # Sidebar ----------- 
               
               dashboardSidebar(
-                #sidebarMenu(
-                  #menuItem("Configure Stream", tabName = "s_configurestream", icon = icon("line-chart")),
-                  #menuItem("Monitor Stream", tabName = "s_monitoring", icon = icon("bar-chart")),
+                sidebarMenu(
+                  menuItem("Configure Stream", tabName = "s_configurestream", icon = icon("line-chart")),
+                  menuItem("Monitor Stream", tabName = "s_monitoring", icon = icon("bar-chart")),
                   uiOutput("ui_streams" )
-                #)
+                )
               ),
               
               # Body -----------------
@@ -49,9 +49,15 @@ dashboardPage(skin = "purple",
                   ),
                   #uiOutput("ui_tab_streams_plot" )
                   tabItem(tabName = "s_monitoring",
+                          fluidPage("Stream Stats",
+                            fluidRow(
                            plotlyOutput("channel_plot")
+                            ),
+                           fluidRow(
+                             verbatimTextOutput("channel_log")
+                           )
+                          )
                   )
-                  # uiOutput("ui_channels_plot")
                 )
               )
 )

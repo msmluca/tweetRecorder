@@ -39,7 +39,7 @@ class StdOutListener(StreamListener):
 	def on_data(self, data):
 		with open(self.output_file, 'a+') as f:
 			f.write(data)
-			print(datetime.now().strftime("%d-%m-%Y %H:%M:%S") + " new tweet!")
+#			print(datetime.now().strftime("%d-%m-%Y %H:%M:%S") + " new tweet!")
 		
 		return True
 
