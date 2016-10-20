@@ -20,10 +20,21 @@ configuration <<- Parse.INI(CONFIG_FILE)
 
 shinyServer(function(input, output, session) {
   
-  output$mytext <-  renderPlotly({
-    channel = 'CHANNEL_MSM_ADVERT'
-    #filename = "/home/rob/Projects/Work/tweetRecorder/data/msm_advert_stats.csv"
-    filename = paste0(configuration[['DEFAULT']]$tweeter_data_folder,"/","msm_tweet_stats.csv")
+  channels <<- names(configuration)
+  channels <<- channels[channels != "DEFAULT"]
+  
+  output$ui_streams <- renderUI({
+    sidebarMenu(
+      menuItem("Configure Stream", tabName = "s_configurestream", icon = icon("line-chart")),
+      menuItem("Monitor Stream", tabName = "s_monitoring", icon = icon("bar-chart")),
+               selectInput("s_select_channel", label = "Select Channel", choices = channels))
+  })
+  
+  output$channel_plot <- renderPlotly({
+    print("Render plot!")
+    channel = input$s_select_channel
+    filename = paste0(configuration[['DEFAULT']]$tweeter_data_folder,"/",configuration[[channel]]$output_file_prefix,"stats.csv")
+    
     tweets = read.csv(filename, colClasses = "character")
     tweets = tweets[!duplicated(tweets$id_str),]
     
@@ -64,15 +75,15 @@ shinyServer(function(input, output, session) {
       new_configuration = list()
       new_configuration['active'] = FALSE
       configuration[[stream_name]] <<- new_configuration
+      channels <<- names(configuration)
+      channels <<- channels[channels != "DEFAULT"]
       output$ui_configurestream <- renderConfiguration(input, configuration)
     }
   })
   
   observeEvent(input$save_action, {
     # Get configuration
-    channels = names(configuration)
-    channels = channels[channels != "DEFAULT"]
-    
+
     for(channel in channels){
       print(paste0("Scanning channel: ", channel))
       

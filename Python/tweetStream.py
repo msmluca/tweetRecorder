@@ -2,7 +2,7 @@
 # @Author: Luca Minello - luca.minello@gmail.com
 # @Date:   2016-10-10 15:03:16
 # @Last Modified by:   Luca Minello
-# @Last Modified time: 2016-10-19 22:57:47
+# @Last Modified time: 2016-10-20 14:40:41
 
 
 from tweepy.streaming import StreamListener
@@ -144,7 +144,7 @@ def main(argv):
 			print("Kill current process")
 			try:
 				os.kill(oldpid, signal.SIGTERM)
-			except OSError, e:
+			except OSError as e:
 				print("PID not found: %s" % str(e))			
 			os.unlink(pidfile)
 		else:

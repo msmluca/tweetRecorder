@@ -2,7 +2,7 @@
 # @Author: Luca Minello - luca.minello@gmail.com
 # @Date:   2016-10-18 15:03:16
 # @Last Modified by:   Luca Minello
-# @Last Modified time: 2016-10-19 22:49:12
+# @Last Modified time: 2016-10-20 15:01:25
 
 import subprocess,configparser
 import glob, json, csv, os
@@ -53,12 +53,12 @@ def main():
 					tweet_data.update({key : track.get(key,'') for key in TWEET_KEYS})	
 					# User tweet data				
 					tweet_user = dict.fromkeys(['user.' + key for key in USER_KEYS])
-					if track.has_key('user'):
+					if 'user' in track:
 						tweet_user.update({'user.' + key : track['user'].get(key,'') for key in USER_KEYS})
 
 					# Entities tweet data
 					tweet_entities = dict.fromkeys(['entities.' + key for key in ENTITIES_KEYS])
-					if track.has_key('entities'):
+					if 'entities' in track:
 						tweet_entities.update({'entities.' + key : track['entities'].get(key,'') for key in ENTITIES_KEYS})
 						tweet_hashtags = {'entities.hashtags' : ":".join([hashtag['text'] for hashtag in tweet_entities['entities.hashtags']])}						
 					else:
@@ -69,7 +69,7 @@ def main():
 					tweet_data.update(tweet_hashtags)				
 
 					# Convert to utf-8
-					tweet_data_enc = {key : value.encode("utf-8") if isinstance(value, basestring) else value for key,value in tweet_data.iteritems() }
+					tweet_data_enc = tweet_data #{key : value.encode("utf-8") if isinstance(value, str) else value for key,value in tweet_data.items() }
 									
 					# Create header if new file
 					if (create_header):						
@@ -79,7 +79,7 @@ def main():
 					# Write stats out
 					output_writer.writerow(tweet_data_enc)   
 
-				except Exception, e:
+				except Exception as e:
 					print("Error " + str(e))			
 										
 
