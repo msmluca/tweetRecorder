@@ -36,7 +36,7 @@ shinyServer(function(input, output, session) {
     
     if(!is.na(logfile)){
       text = readLines(paste0(filename_path,"/",logfile), warn = FALSE)
-      split_text = rev(lapply(text, function(x) if (length(x) > 0) {unlist(splitInParts(x,120))}))[1:10]
+      split_text = rev(lapply(text, function(x) if (length(x) > 0) {unlist(splitInParts(x,120))}))[1:50]
       cat(unlist(split_text),sep="\n")
     }
     else
@@ -54,6 +54,13 @@ shinyServer(function(input, output, session) {
     tweets$created_at_dt = as.POSIXct(strptime(tweets$created_at, "%a %b %d %H:%M:%S +0000 %Y"))
     tweets$created_at_d = as.Date(tweets$created_at_dt)
     tweets$created_at <- NULL
+    
+
+    updateDateRangeInput(session, "download_range", 
+                         min = min(tweets$created_at_d,na.rm=TRUE), 
+                         start =  min(tweets$created_at_d,na.rm=TRUE), 
+                         max = max(tweets$created_at_d,na.rm=TRUE),
+                         end = max(tweets$created_at_d,na.rm=TRUE))
     
     hashtags = tolower(configuration[[channel]]$hashtags)
     

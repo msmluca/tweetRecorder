@@ -39,23 +39,36 @@ dashboardPage(skin = "purple",
                   # Body menu --------------
                   tabItem(tabName = "s_configurestream",
                           fluidPage(
-                      uiOutput("ui_configurestream"),
-                      fluidRow(
-                        textInput("new_stream_name", label = "Stream name", value=""),
-                        actionButton("create_stream", label = "New Stream"),
-                        actionButton("save_action", label = "Save Configuration")
-                      )
-                     )
+                            uiOutput("ui_configurestream"),
+                            fluidRow(
+                              textInput("new_stream_name", label = "Stream name", value=""),
+                              actionButton("create_stream", label = "New Stream"),
+                              actionButton("save_action", label = "Save Configuration")
+                            )
+                          )
                   ),
                   #uiOutput("ui_tab_streams_plot" )
                   tabItem(tabName = "s_monitoring",
-                          fluidPage("Stream Stats",
+                          fluidPage(
                             fluidRow(
-                           plotlyOutput("channel_plot")
+                              box(
+                                plotlyOutput("channel_plot"),
+                                title = "Tweets volumes",width = "800px"
+                              )
                             ),
-                           fluidRow(
-                             verbatimTextOutput("channel_log")
-                           )
+                            fluidRow(
+                              box(
+                                dateRangeInput("download_range", "Select date range"),
+                                actionButton("download_tweet", label = "Download"),
+                                title = "Download Tweets"
+                              )
+                            ),
+                            fluidRow(
+                              box(
+                                verbatimTextOutput("channel_log"),
+                                title = "Log file", collapsible = TRUE, width = "800px"
+                              )
+                            )
                           )
                   )
                 )
